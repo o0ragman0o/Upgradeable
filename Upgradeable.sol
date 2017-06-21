@@ -18,17 +18,26 @@ GNU lesser General Public License for more details.
 
 pragma solidity ^0.4.0;
 
-import "Owned.sol";
-import "ERC20.sol";
+import "Base.sol";
 
 contract Upgradable is Owned
 {
+/* Constants */
+
+    string constant "Upgradeable 0.1.0-alpha";
+
+/* State Variables */
+
     address public predecessor;
     address public successor;
-    
+
+/* Events */
+
     event Upgraded(address indexed _successor);
     event UpgradedFrom(address indexed _predecessor);
-    
+
+/* Modifiers */
+
     // Can be used to allow operation of functions post upgrade 
     modifier isUpgraded() {
         if (successor == 0x0) throw;
@@ -45,7 +54,8 @@ contract Upgradable is Owned
         if (predecessor == 0x0) throw;
         _;
     }
-    
+
+/* Functions */    
     // Can only be called 'once' from the potential 'successor' contract
     // by the 'owner' of the predesessor (this) contract.
     function upgrade() external notUpgraded returns (bool)
@@ -64,36 +74,4 @@ contract Upgradable is Owned
         if(!Upgradable(_predecessor).upgrade()) throw;
         return true;
     }
-}
-
-
-// Example upgradable Token contract
-contract UpgradableToken is Upgradable, ERC20Interface
-{
-
-    string constant VERSION = "UGDT 0.1.0";
-
-    event UpgradedTokens(address indexed _successor,
-        address indexed _holder, uint _amount);
-    
-    function upgradeTokens() public isUpgraded returns (uint)
-    {
-        uint tokens = balanceOf[msg.sender];
-        if (tokens == 0) throw;
-        delete balanceOf[msg.sender];
-        totalSupply -= tokens;
-        if(!UpgradableToken(successor).upgradeTokensFor(msg.sender, tokens))
-            throw;
-        return tokens;
-    }
-
-    function upgradeTokensFor (address holder, uint tokens)
-        external returns (bool)
-    {
-        if (msg.sender != predecessor) throw;
-        balanceOf[holder] += tokens;
-        totalSupply += tokens;
-        return true;
-    }
-    
 }

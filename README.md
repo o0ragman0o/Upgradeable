@@ -1,2 +1,3 @@
 # Upgradeable
-A base solidity contract provisioning a smart contracts upgrade framework
+**Experimental**
+A solidity contract provisioning an upgrade framework for smart contracts 
